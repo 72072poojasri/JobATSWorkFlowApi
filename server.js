@@ -76,9 +76,6 @@ app.post("/jobs", requireRole("RECRUITER"), (req, res) => {
   });
 });
 
-/* ===============================
-   APPLICATION WORKFLOW
-================================ */
 
 /* Valid state machine */
 const VALID_TRANSITIONS = {
