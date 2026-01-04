@@ -1,303 +1,226 @@
 # Job Application Tracking System (ATS) API
 
-✅ VERIFIED OPERATIONAL  
-All 37 tests passing (100% functionality verified)  
-Last Verified: January 2025  
+## Overview
+
+This project is a **Node.js and Express.js based Job Application Tracking System (ATS) backend API** developed for evaluation and learning purposes.
+
+The system focuses on implementing **core ATS workflow logic**, including job postings, application submission, workflow stage transitions, role-based access control (RBAC), and audit logging.
+
+Some infrastructure-heavy components (such as background workers, advanced scalability, and enterprise-grade security) are implemented in a **simplified form** to keep the project easy to review and run locally during evaluation.
 
 ---
 
-## Project Overview
+## Key Objectives
 
-This is a production-ready Job Application Tracking System (ATS) backend API built using Node.js, Express.js, PostgreSQL, Redis, and BullMQ. The system manages the complete job application lifecycle including job creation, application submission, workflow stage transitions, role-based access control, multi-tenancy, audit logging, and asynchronous email notifications.
-
-This project demonstrates real-world backend engineering concepts such as layered architecture, workflow state machines, RBAC, transactional consistency, background job processing, and enterprise-grade security practices.
+- Demonstrate backend API design using Node.js and Express
+- Implement workflow-based business logic using a state machine
+- Enforce Role-Based Access Control (RBAC)
+- Track application stage changes with audit history
+- Illustrate the concept of asynchronous processing
 
 ---
 
-## User Roles & Use Cases
+## User Roles
 
-Candidates:
-- Register and login
-- View open jobs
-- Submit job applications
-- Track application status and history
+### Candidate
+- Register and log in
+- View available jobs
+- Apply for jobs
+- View own applications and current stage
 
-Recruiters:
-- Create, update, delete jobs
+### Recruiter
+- Create job postings
 - View applications for company jobs
 - Move applications through workflow stages
 
-Hiring Managers:
-- View assigned applications
-- Participate in hiring decisions and stage transitions
+### Hiring Manager
+- View applications for company jobs  
+  *(Limited access in current implementation)*
 
 ---
 
-## System Architecture
+## Architecture Overview
 
-Client (React / Vue / Postman)
-  |
-  | HTTPS
-  |
-Express.js API
-├── Routes & Controllers
-├── Services Layer
-│   ├── AuthService (JWT, bcrypt)
-│   ├── ApplicationService (Transactions)
-│   ├── StateMachineService (Workflow rules)
-├── Middleware
-│   ├── Authentication
-│   ├── RBAC Authorization
-│   ├── Validation, Rate Limiting, Security
-│
-├── PostgreSQL Database
-│   ├── Users
-│   ├── Companies
-│   ├── Jobs
-│   ├── Applications
-│   └── ApplicationHistory
-│
-├── Redis
-│   └── BullMQ Queue
-│       └── Email Worker
-│           └── SendGrid
+The application follows a **simple layered structure**:
 
-Design Principles:
-- Layered Architecture
-- Centralized State Machine
-- Asynchronous Email Processing
-- Company-level Multi-Tenancy
-- Transactional Safety
-- RBAC Enforcement via Middleware
+Client (Postman / Browser)  
+→ Express.js API  
+→ Routes & Middleware  
+→ Services (Workflow Logic)  
+→ Models (Database Schemas)
 
----
-
-## Technology Stack
-
-Runtime: Node.js 16+  
-Framework: Express.js  
-Database: PostgreSQL  
-ORM: Sequelize  
-Authentication: JWT + bcryptjs  
-Queue: BullMQ  
-Cache: Redis  
-Email: SendGrid  
-Validation: express-validator  
-Security: helmet, cors  
-Rate Limiting: express-rate-limit  
-Testing: Jest, Supertest  
-
-## Core Features
-
-Authentication:
-- JWT-based authentication (24-hour expiry)
-- Password hashing using bcrypt
-- Roles: candidate, recruiter, hiring_manager
-
-Job Management:
-- Recruiters manage company jobs
-- Job status: open / closed
-- Candidates can view open jobs
-
-Application Workflow:
-- One application per candidate per jobs
-- Workflow enforced using State Machine
-- Full audit trail via ApplicationHistory
-- Terminal states enforced
-
-Asynchronous Email Notifications:
-- Application submission confirmation
-- Recruiter notification
-- Candidate status update
-- Retry with exponential backoff
+Design notes:
+- Business logic is implemented directly within route handlers for simplicity.
+- A separate workflow service defines valid application stage transitions.
+- Asynchronous processing is demonstrated using a simplified approach.
 
 ---
 
 ## Workflow State Machine
 
-Valid Flow:
+Applications follow a predefined workflow:
+
 Applied → Screening → Interview → Offer → Hired
 
-Rejected can be reached from any non-terminal stage.
-Rejected and Hired are terminal states.
+- `Rejected` can be reached from any non-terminal stage.
+- `Hired` and `Rejected` are terminal states.
+- Invalid transitions are blocked by validation logic.
 
-State transitions are centrally validated:
-
-StateMachineService.isValidTransition("Applied", "Screening") → true  
-StateMachineService.isValidTransition("Applied", "Offer") → false  
-
-## RBAC Matrix
-
-POST /auth/register → All  
-POST /auth/login → All  
-GET /jobs → All  
-POST /jobs → Recruiter only  
-PUT /jobs/:id → Recruiter (own company)  
-DELETE /jobs/:id → Recruiter (own company)  
-POST /applications/submit → Candidate only  
-GET /applications/my-applications → Candidate only  
-GET /applications/job/:jobId/apps → Recruiter only  
-PUT /applications/:id/stage → Recruiter / Hiring Manager  
-GET /applications/:id → Role based (own/company)
+Examples:
+- Applied → Interview ❌ (blocked)
+- Screening → Interview ✅
+- Any stage → Rejected ✅
 
 ---
 
-## Database Schema Summary
+## Role-Based Access Control (RBAC)
 
-Company:
-- id, name, industry, website
+| Endpoint | Allowed Roles |
+|--------|--------------|
+| POST /auth/register | All |
+| POST /auth/login | All |
+| GET /jobs | All |
+| POST /jobs | Recruiter |
+| POST /applications/:jobId | Candidate |
+| GET /applications/my-applications | Candidate |
+| GET /applications/job/:jobId | Recruiter |
+| PUT /applications/:id/stage | Recruiter |
 
-User:
-- id, email, password, role, companyId
+RBAC is enforced using middleware based on the authenticated user’s role.
 
-Job:
-- id, title, description, status, companyId, createdBy
+---
 
-Application:
-- id, candidateId, jobId, stage, resume, coverLetter
-- UNIQUE(candidateId, jobId)
+## Data Models Summary
 
-ApplicationHistory:
-- id, applicationId, previousStage, newStage, changedBy, reason
-
-Indexes applied for performance on:
-- candidateId + jobId
+### User
+- id
+- email
+- password
+- role (candidate, recruiter, hiring_manager)
 - companyId
+
+### Job
+- id
+- title
+- description
+- status
+- companyId
+
+### Application
+- id
+- candidateId
+- jobId
 - stage
+
+### ApplicationHistory
+- id
+- applicationId
+- fromStage
+- toStage
+- changedBy
+- timestamp
+
+---
+
+## Asynchronous Email Processing (Simplified)
+
+The project includes a **demonstration of asynchronous email handling**:
+
+- Email sending is triggered after key events (application submission, stage change).
+- The current implementation uses a simplified, in-memory mechanism to simulate background processing.
+- This avoids external infrastructure dependencies during evaluation.
+
+Note:  
+In a production system, this would be replaced with a persistent message queue (e.g., Redis + BullMQ) and a dedicated worker process.
 
 ---
 
 ## Installation & Setup
 
-Prerequisites:
-- Node.js 16+
-- PostgreSQL 12+
-- Redis 6+
+### Prerequisites
+- Node.js (v16 or above)
+- MongoDB (local instance)
 
-Steps:
+### Steps
 npm install  
-cp .env.example .env  
-npm run dev  
-npm run worker  
+npm start  
 
-Verify:
+### Verify
 GET http://localhost:3000/health
 
 ---
 
 ## Environment Variables
 
+The following values are used in the current setup:
+
 PORT=3000  
-NODE_ENV=development  
-DATABASE_URL=postgresql://user:pass@localhost:5432/ats_db  
-REDIS_URL=redis://localhost:6379  
-JWT_SECRET=your_secret_key  
-SENDGRID_API_KEY=SG.xxxxx  
-SENDGRID_FROM_EMAIL=noreply@ats.com  
-WORKER_CONCURRENCY=5  
+JWT_SECRET=example_secret  
+MONGO_URI=mongodb://localhost:27017/ats_db  
+
+Security Note:  
+Secrets are simplified for evaluation purposes.  
+In a production system, all secrets should be managed using environment variables or a secret manager.
 
 ---
 
 ## API Endpoints
 
-Authentication:
-POST /auth/register  
-POST /auth/login  
+### Authentication
+- POST /auth/register
+- POST /auth/login
 
-Jobs:
-GET /jobs  
-GET /jobs/:jobId  
-POST /jobs  
-PUT /jobs/:jobId  
-DELETE /jobs/:jobId  
+### Jobs
+- GET /jobs
+- POST /jobs
 
-Applications:
-POST /applications/submit  
-GET /applications/my-applications  
-GET /applications/job/:jobId/apps  
-PUT /applications/:id/stage  
-GET /applications/:id  
+### Applications
+- POST /applications/:jobId
+- GET /applications/my-applications
+- GET /applications/job/:jobId
+- PUT /applications/:id/stage
 
 ---
 
-## Testing
+## Limitations
 
-All 37 tests passing (100%)
+- Job update and delete endpoints are not implemented.
+- Hiring manager role has limited permissions.
+- Asynchronous email processing is simplified and not persistent.
+- Database operations are not wrapped in transactions.
+- Minimal automated test coverage.
 
-Coverage includes:
-- Authentication
-- RBAC
-- Workflow validation
-- Email queue
-- Transactions
-- Security
-- Error handling
-
-Commands:
-npm test  
-node verify-comprehensive.js  
+These limitations are intentional to keep the implementation focused on core workflow logic.
 
 ---
 
-## Security Implementation
+## Design Trade-offs
 
-- JWT authentication
-- Password hashing
-- RBAC middleware
-- Company-level isolation
-- Helmet security headers
-- Rate limiting
-- Input validation
-- No secrets committed to Git
+- Prioritized workflow correctness over infrastructure completeness.
+- Used a monolithic structure to reduce boilerplate.
+- Simplified background processing to avoid external dependencies during evaluation.
 
 ---
 
-## Asynchronous Email Architecture
+## Future Improvements
 
-Application Event  
-→ Redis Queue (BullMQ)  
-→ Email Worker  
-→ SendGrid  
-→ User Email  
-
-- Non-blocking API
-- Retry with exponential backoff
+- Full CRUD operations for jobs
+- Persistent background job queue
+- Database transactions
+- Improved automated test coverage
+- Pagination and filtering
+- Production-grade security configuration
 
 ---
 
-## Deployment Checklist
+## Final Note
 
-- Production environment variables
-- HTTPS enabled
-- CI/CD pipeline
-- Monitoring & logging
-- Database backups
-- Load testing
+This project is an **evaluation-focused backend implementation** demonstrating core ATS concepts such as workflow enforcement, RBAC, and audit logging.
 
----
-
-## Future Enhancements
-
-- Pagination & filtering
-- Search functionality
-- WebSocket notifications
-- Resume uploads (S3)
-- Interview scheduling
-- Analytics dashboard
+It is designed to be easy to understand, review, and extend.
 
 ---
 
 ## License
 
 MIT
-
----
-
-## Final Note
-
-This project is fully submission-ready and satisfies all evaluation requirements:
-Architecture, RBAC, workflow logic, async processing, security, testing, and documentation.
-
-
-
-You can directly paste this into README.md and push to GitHub.
