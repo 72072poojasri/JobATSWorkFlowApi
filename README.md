@@ -87,8 +87,6 @@ Security: helmet, cors
 Rate Limiting: express-rate-limit  
 Testing: Jest, Supertest  
 
----
-
 ## Core Features
 
 Authentication:
