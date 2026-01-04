@@ -1,0 +1,27 @@
+services:
+  api:
+    build: .
+    container_name: job-ats-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:14
+    container_name: job-ats-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ats_db
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:6
+    container_name: job-ats-redis
+    ports:
+      - "6379:6379"

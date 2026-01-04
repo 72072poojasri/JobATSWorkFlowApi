@@ -1,0 +1,39 @@
+{
+  "name": "job-application-tracking-system",
+  "version": "1.0.0",
+  "description": "A production-ready Job Application Tracking System API with state machine workflows, async processing, and role-based access control",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "ATS",
+    "recruitment",
+    "job-application",
+    "workflow",
+    "state-machine"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^3.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "express-validator": "^7.0.0",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "node-fetch": "^2.7.0",
+    "pg": "^8.9.0",
+    "redis": "^4.6.5",
+    "sequelize": "^6.29.0"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.20",
+    "supertest": "^6.3.3"
+  }
+}

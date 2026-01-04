@@ -1,0 +1,200 @@
+{
+  "info": {
+    "name": "ATS API Collection",
+    "description": "Complete API collection for Job Application Tracking System",
+    "version": "1.0.0"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    { "key": "candidate_token", "value": "", "type": "string" },
+    { "key": "recruiter_token", "value": "", "type": "string" },
+    { "key": "company_id", "value": "", "type": "string" },
+    { "key": "job_id", "value": "", "type": "string" },
+    { "key": "application_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register Candidate",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"candidate@example.com\",\n  \"password\": \"securePassword123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"candidate\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Register Recruiter",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"recruiter@example.com\",\n  \"password\": \"securePassword123\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"role\": \"recruiter\",\n  \"companyId\": \"{{company_id}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login Candidate",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"candidate@example.com\",\n  \"password\": \"securePassword123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login Recruiter",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"recruiter@example.com\",\n  \"password\": \"securePassword123\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "Create Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{recruiter_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Backend Engineer\",\n  \"description\": \"We are looking for an experienced Node.js developer with expertise in building scalable APIs\",\n  \"companyId\": \"{{company_id}}\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/jobs", "host": ["{{base_url}}"], "path": ["jobs"] }
+          }
+        },
+        {
+          "name": "Get All Jobs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/jobs", "host": ["{{base_url}}"], "path": ["jobs"] }
+          }
+        },
+        {
+          "name": "Get Job Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/jobs/{{job_id}}", "host": ["{{base_url}}"], "path": ["jobs", "{{job_id}}"] }
+          }
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{recruiter_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"closed\",\n  \"title\": \"Senior Backend Engineer - Updated\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/jobs/{{job_id}}", "host": ["{{base_url}}"], "path": ["jobs", "{{job_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Job",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{recruiter_token}}" }],
+            "url": { "raw": "{{base_url}}/jobs/{{job_id}}", "host": ["{{base_url}}"], "path": ["jobs", "{{job_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Submit Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{candidate_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobId\": \"{{job_id}}\",\n  \"resumeUrl\": \"https://example.com/resume.pdf\",\n  \"coverLetter\": \"I am very interested in this position. I have 5+ years of experience with Node.js...\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/applications/submit", "host": ["{{base_url}}"], "path": ["applications", "submit"] }
+          }
+        },
+        {
+          "name": "Change Application Stage",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{recruiter_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newStage\": \"Screening\",\n  \"reason\": \"Resume looks promising, moving to screening phase\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/applications/{{application_id}}/stage", "host": ["{{base_url}}"], "path": ["applications", "{{application_id}}", "stage"] }
+          }
+        },
+        {
+          "name": "Get Application Details",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{candidate_token}}" }],
+            "url": { "raw": "{{base_url}}/applications/{{application_id}}", "host": ["{{base_url}}"], "path": ["applications", "{{application_id}}"] }
+          }
+        },
+        {
+          "name": "Get Job Applications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{recruiter_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/applications/job/{{job_id}}/applications?stage=Applied",
+              "host": ["{{base_url}}"],
+              "path": ["applications", "job", "{{job_id}}", "applications"],
+              "query": [{ "key": "stage", "value": "Applied" }]
+            }
+          }
+        },
+        {
+          "name": "Get My Applications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{candidate_token}}" }],
+            "url": { "raw": "{{base_url}}/applications/my-applications", "host": ["{{base_url}}"], "path": ["applications", "my-applications"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          }
+        }
+      ]
+    }
+  ]
+}
