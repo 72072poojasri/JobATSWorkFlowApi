@@ -102,7 +102,7 @@ Job Management:
 - Candidates can view open jobs
 
 Application Workflow:
-- One application per candidate per job
+- One application per candidate per jobs
 - Workflow enforced using State Machine
 - Full audit trail via ApplicationHistory
 - Terminal states enforced
