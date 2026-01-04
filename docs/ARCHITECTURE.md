@@ -372,5 +372,3 @@ Metrics (Future):
 Document Version: 1.0.0  
 Last Updated: December 14, 2024  
 Status: Complete
-
-
