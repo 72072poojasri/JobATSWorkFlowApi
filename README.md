@@ -224,7 +224,3 @@ It is designed to be easy to understand, review, and extend.
 ## License
 
 MIT
-
-
-
-
