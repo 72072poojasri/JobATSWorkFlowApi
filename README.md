@@ -128,8 +128,6 @@ State transitions are centrally validated:
 StateMachineService.isValidTransition("Applied", "Screening") → true  
 StateMachineService.isValidTransition("Applied", "Offer") → false  
 
----
-
 ## RBAC Matrix
 
 POST /auth/register → All  
